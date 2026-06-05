@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PhraseCard from "../components/PhraseCard";
 import QuizOptions from "../components/QuizOptions";
 import SeriesHeader from "../components/SeriesHeader";
@@ -31,6 +31,11 @@ export default function QuizPage() {
   useEffect(() => {
     getGreekVoiceName().then(setGreekVoiceName);
   }, []);
+
+  const shuffledOptions = useMemo(
+    () => (current ? shuffleOptions(current.options) : []),
+    [current]
+  );
 
   const handleAnswer = async (answer: string) => {
     if (!current || feedback || isAdvancing) return;
@@ -122,7 +127,7 @@ export default function QuizPage() {
                 correctAnswer={current.translation}
                 disabled={feedback !== null || isAdvancing}
                 onAnswer={handleAnswer}
-                options={current.options}
+                options={shuffledOptions}
                 selectedAnswer={selectedAnswer}
               />
               <div className="mt-auto pt-5">
@@ -184,4 +189,15 @@ export default function QuizPage() {
       </div>
     </main>
   );
+}
+
+function shuffleOptions(options: string[]) {
+  const shuffled = [...options];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+
+  return shuffled;
 }
