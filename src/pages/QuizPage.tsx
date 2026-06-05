@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PhraseCard from "../components/PhraseCard";
 import QuizOptions from "../components/QuizOptions";
 import SeriesHeader from "../components/SeriesHeader";
+import SeriesSelector from "../components/SeriesSelector";
 import { phrases } from "../data/phrases";
 import { useQuizEngine } from "../hooks/useQuizEngine";
 import { getGreekVoiceName, speak } from "../services/speechService";
@@ -17,8 +18,10 @@ export default function QuizPage() {
     isSeriesComplete,
     masteredCount,
     nextPhrase,
+    progressBySeries,
     progressPercent,
     resetSeries,
+    selectSeries,
     stats,
     submitAnswer,
     totalCount,
@@ -59,6 +62,14 @@ export default function QuizPage() {
           progressPercent={progressPercent}
           series={currentSeries}
           totalCount={totalCount}
+        />
+        <SeriesSelector
+          currentSeries={currentSeries}
+          progressBySeries={progressBySeries}
+          onSelectSeries={(series) => {
+            setSelectedAnswer(null);
+            selectSeries(series);
+          }}
         />
 
         {greekVoiceName === null ? (
@@ -158,7 +169,7 @@ export default function QuizPage() {
                 onClick={unlockNextSeries}
                 className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#e7c982]/30 bg-[#e7c982]/12 px-5 text-sm font-bold text-[#e7c982] transition hover:bg-[#e7c982]/20 focus:outline-none focus:ring-2 focus:ring-[#e7c982]/45 focus:ring-offset-2 focus:ring-offset-[#18211f]"
               >
-                Passer à la série {currentSeries + 1}
+                Passer à la série {Math.min(currentSeries + 1, 10)}
               </button>
               <button
                 type="button"
