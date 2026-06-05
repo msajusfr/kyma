@@ -1,15 +1,45 @@
+import ProgressGauge from "./ProgressGauge";
+
 interface SeriesHeaderProps {
+  masteredCount: number;
+  progressPercent: number;
   series: number;
-  totalSeries?: number;
+  totalCount: number;
 }
 
-export default function SeriesHeader({ series, totalSeries = 10 }: SeriesHeaderProps) {
+export default function SeriesHeader({
+  masteredCount,
+  progressPercent,
+  series,
+  totalCount,
+}: SeriesHeaderProps) {
   return (
-    <div className="flex items-center justify-between w-full">
-      <h1 className="text-2xl font-bold text-slate-900">Kyma</h1>
-      <div className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-        Series {series} / {totalSeries}
+    <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#e7c982]/75">
+          Greek Quiz Trainer
+        </p>
+        <div className="mt-2 flex items-center gap-3">
+          <img
+            src="/kyma-logo.png"
+            alt=""
+            aria-hidden="true"
+            className="h-12 w-24 object-contain md:h-14 md:w-28"
+          />
+          <h1 className="text-4xl font-bold tracking-tight text-[#f4efe2] md:text-5xl">
+            Kyma
+          </h1>
+        </div>
       </div>
-    </div>
+      <div className="w-full max-w-sm md:text-right">
+        <div className="mb-2 flex items-baseline justify-between gap-4 md:justify-end">
+          <p className="text-sm font-semibold text-[#f4efe2]/72">Série {series}</p>
+          <p className="text-sm text-[#f4efe2]/55">
+            {masteredCount} / {totalCount} maîtrisées
+          </p>
+        </div>
+        <ProgressGauge value={progressPercent} />
+      </div>
+    </header>
   );
 }

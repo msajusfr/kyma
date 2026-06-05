@@ -1,4 +1,6 @@
-import { GreekPhrase } from "../types/GreekPhrase";
+import { useEffect } from "react";
+import type { GreekPhrase } from "../types/GreekPhrase";
+import { speak, stop } from "../services/speechService";
 import AudioButton from "./AudioButton";
 
 interface PhraseCardProps {
@@ -6,17 +8,20 @@ interface PhraseCardProps {
 }
 
 export default function PhraseCard({ phrase }: PhraseCardProps) {
+  useEffect(() => {
+    speak(phrase.greek);
+    return stop;
+  }, [phrase.id, phrase.greek]);
+
   return (
-    <div className="flex flex-col items-center gap-4 p-6 bg-white rounded-2xl shadow border border-slate-100">
-      <div className="text-4xl font-semibold text-slate-900 text-center leading-tight">
-        {phrase.greek}
+    <section className="relative overflow-hidden rounded-xl border border-white/10 bg-[#18211f]/95 shadow-[0_24px_80px_rgba(0,0,0,0.34)]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c982]/55 to-transparent" />
+      <div className="flex min-h-[220px] items-center justify-between gap-4 p-6 md:min-h-[280px] md:p-8">
+        <p className="min-w-0 text-6xl font-bold leading-none tracking-normal text-[#f4efe2] md:text-8xl">
+          {phrase.greek}
+        </p>
+        <AudioButton text={phrase.greek} />
       </div>
-      {phrase.transliteration && (
-        <div className="text-lg text-slate-500 italic text-center">
-          {phrase.transliteration}
-        </div>
-      )}
-      <AudioButton text={phrase.greek} />
-    </div>
+    </section>
   );
 }

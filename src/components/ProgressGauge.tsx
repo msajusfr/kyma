@@ -1,26 +1,17 @@
 interface ProgressGaugeProps {
-  progress: number;
-  streak: number;
+  value: number;
 }
 
-export default function ProgressGauge({ progress, streak }: ProgressGaugeProps) {
+export default function ProgressGauge({ value }: ProgressGaugeProps) {
   return (
-    <div className="flex items-center justify-between w-full px-1">
-      <div className="flex-1 mr-4">
-        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-sky-500 rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="text-xs text-slate-500 mt-1">{progress}% completed</div>
-      </div>
-      {streak > 0 && (
-        <div className="flex items-center gap-1 text-amber-600 font-semibold text-sm">
-          <span>🔥</span>
-          <span>{streak}</span>
-        </div>
-      )}
+    <div
+      className="h-2 overflow-hidden rounded-full bg-white/10"
+      aria-label={`Progression ${value}%`}
+    >
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-[#2ea6a0] via-[#9fb27b] to-[#e7c982] transition-all duration-500"
+        style={{ width: `${value}%` }}
+      />
     </div>
   );
 }

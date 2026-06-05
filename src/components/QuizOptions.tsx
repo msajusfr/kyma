@@ -1,48 +1,53 @@
-import { useState } from "react";
-
 interface QuizOptionsProps {
   options: string[];
   correctAnswer: string;
-  onAnswer: (correct: boolean) => void;
-  disabled?: boolean;
+  disabled: boolean;
+  onAnswer: (answer: string) => void;
+  selectedAnswer: string | null;
 }
 
-export default function QuizOptions({ options, correctAnswer, onAnswer, disabled }: QuizOptionsProps) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState(false);
+export default function QuizOptions({
+  options,
+  correctAnswer,
+  disabled,
+  onAnswer,
+  selectedAnswer,
+}: QuizOptionsProps) {
+  const getButtonClasses = (option: string) => {
+    const base =
+      "w-full rounded-lg border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[#e7c982]/45 focus:ring-offset-2 focus:ring-offset-[#18211f] active:scale-[0.99]";
 
-  const handleSelect = (opt: string) => {
-    if (disabled || revealed) return;
-    setSelected(opt);
-    setRevealed(true);
-    const isCorrect = opt === correctAnswer;
-    onAnswer(isCorrect);
-  };
+    if (!disabled) {
+      return `${base} border-white/8 bg-white/[0.045] hover:border-[#e7c982]/35 hover:bg-white/[0.075]`;
+    }
 
-  const getButtonClasses = (opt: string) => {
-    const base = "w-full text-left px-5 py-4 rounded-xl border-2 text-base font-medium transition active:scale-[0.98]";
-    if (!revealed) {
-      return `${base} bg-white border-slate-200 text-slate-800 hover:border-sky-400 hover:bg-sky-50`;
+    if (option === correctAnswer) {
+      return `${base} border-[#9fb27b]/70 bg-[#9fb27b]/18`;
     }
-    if (opt === correctAnswer) {
-      return `${base} bg-emerald-50 border-emerald-500 text-emerald-800`;
+
+    if (option === selectedAnswer) {
+      return `${base} border-red-400/65 bg-red-500/12`;
     }
-    if (opt === selected) {
-      return `${base} bg-rose-50 border-rose-500 text-rose-800`;
-    }
-    return `${base} bg-white border-slate-200 text-slate-400`;
+
+    return `${base} border-white/8 bg-white/[0.03] opacity-45`;
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      {options.map((opt) => (
+    <div className="grid gap-2.5">
+      {options.map((option, index) => (
         <button
-          key={opt}
-          onClick={() => handleSelect(opt)}
-          disabled={revealed}
-          className={getButtonClasses(opt)}
+          key={option}
+          type="button"
+          disabled={disabled}
+          onClick={() => onAnswer(option)}
+          className={getButtonClasses(option)}
         >
-          {opt}
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.055] text-xs font-bold text-[#e7c982]/85">
+              {String.fromCharCode(65 + index)}
+            </span>
+            <span className="min-w-0 text-base font-semibold text-[#f4efe2]">{option}</span>
+          </span>
         </button>
       ))}
     </div>

@@ -1,24 +1,52 @@
-import { useCallback } from "react";
-import { speakGreek, stopSpeech } from "../services/speechService";
+import { useState } from "react";
+import { speak } from "../services/speechService";
 
 interface AudioButtonProps {
   text: string;
 }
 
 export default function AudioButton({ text }: AudioButtonProps) {
-  const handleClick = useCallback(() => {
-    speakGreek(text);
-  }, [text]);
+  const [status, setStatus] = useState<"idle" | "playing" | "missing">("idle");
+
+  const handleClick = async () => {
+    setStatus("playing");
+    const didSpeak = await speak(text);
+    setStatus(didSpeak ? "idle" : "missing");
+  };
 
   return (
     <button
+      type="button"
       onClick={handleClick}
-      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sky-600 text-white shadow hover:bg-sky-700 active:scale-95 transition"
-      aria-label="Play audio"
-      title="Play pronunciation"
+      className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-[#e7c982]/45 focus:ring-offset-2 focus:ring-offset-[#18211f] active:scale-95 ${
+        status === "missing"
+          ? "border-red-300/35 bg-red-500/10 text-red-200"
+          : "border-[#e7c982]/25 bg-[#e7c982]/10 text-[#e7c982] hover:bg-[#e7c982]/20"
+      } ${status === "playing" ? "bg-[#e7c982]/20" : ""}`}
+      aria-label={status === "missing" ? "Voix grecque absente" : "Écouter la phrase"}
+      title={status === "missing" ? "Aucune vraie voix grecque n'est disponible" : "Écouter"}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+      <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M5 9v6h4l5 4V5L9 9H5Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M17 9.5a4 4 0 0 1 0 5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        {status === "missing" ? (
+          <path
+            d="M4 4l16 16"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        ) : null}
       </svg>
     </button>
   );
