@@ -74,6 +74,7 @@ function QuizSession({ exercise, selectedExerciseId, onSelectExercise }: QuizSes
     if (answer === current.translation) {
       setIsAdvancing(true);
       await speak(current.greek);
+      await wait(2000);
       submitAnswer(answer);
       setSelectedAnswer(null);
       setIsAdvancing(false);
@@ -132,6 +133,19 @@ function QuizSession({ exercise, selectedExerciseId, onSelectExercise }: QuizSes
           <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="grid content-start gap-4">
               <PhraseCard phrase={current} />
+
+              {isAdvancing ? (
+                <section
+                  className="flex items-center gap-3 rounded-xl border border-[#e7c982]/30 bg-[#e7c982]/12 p-4 text-sm font-semibold text-[#e7c982] shadow-[0_18px_60px_rgba(0,0,0,0.22)]"
+                  aria-live="polite"
+                >
+                  <span
+                    className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-[#e7c982]/25 border-t-[#e7c982]"
+                    aria-hidden="true"
+                  />
+                  <span>Phrase suivante dans 2 secondes...</span>
+                </section>
+              ) : null}
 
               {feedback ? (
                 <section
@@ -243,4 +257,8 @@ function shuffleOptions(options: string[]) {
   }
 
   return shuffled;
+}
+
+function wait(duration: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, duration));
 }

@@ -1,3 +1,4 @@
+import { advancedGreekQuizPhrases, advancedGreekQuizSeriesLabels } from "./advancedGreekQuiz";
 import { keaShoppingPhrases } from "./keaShoppingPhrases";
 import { phrases as levelTestPhrases } from "./phrases";
 import type { GreekExercise } from "../types/GreekPhrase";
@@ -31,5 +32,12 @@ export const exercises: GreekExercise[] = [
       3: "Boulanger",
     },
     phrases: keaShoppingPhrases,
+  },
+  {
+    id: "advanced-greek-quiz-10000",
+    title: "Quiz grec avancé",
+    description: "10 000 phrases courtes en quiz de traduction, par blocs de 1 000 phrases.",
+    seriesLabels: advancedGreekQuizSeriesLabels,
+    phrases: advancedGreekQuizPhrases,
   },
 ];
