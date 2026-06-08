@@ -7,3 +7,11 @@ export interface GreekPhrase {
   options: string[];
   difficulty: number;
 }
+
+export interface GreekExercise {
+  id: string;
+  title: string;
+  description: string;
+  seriesLabels: Record<number, string>;
+  phrases: GreekPhrase[];
+}

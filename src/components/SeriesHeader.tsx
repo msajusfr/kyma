@@ -1,16 +1,20 @@
 import ProgressGauge from "./ProgressGauge";
 
 interface SeriesHeaderProps {
+  exerciseTitle: string;
   masteredCount: number;
   progressPercent: number;
   series: number;
+  seriesLabel: string;
   totalCount: number;
 }
 
 export default function SeriesHeader({
+  exerciseTitle,
   masteredCount,
   progressPercent,
   series,
+  seriesLabel,
   totalCount,
 }: SeriesHeaderProps) {
   return (
@@ -30,10 +34,13 @@ export default function SeriesHeader({
             Kyma
           </h1>
         </div>
+        <p className="mt-2 text-sm font-semibold text-[#e7c982]/75">{exerciseTitle}</p>
       </div>
       <div className="w-full max-w-sm md:text-right">
         <div className="mb-2 flex items-baseline justify-between gap-4 md:justify-end">
-          <p className="text-sm font-semibold text-[#f4efe2]/72">Série {series}</p>
+          <p className="text-sm font-semibold text-[#f4efe2]/72">
+            Série {series} · {seriesLabel}
+          </p>
           <p className="text-sm text-[#f4efe2]/55">
             {masteredCount} / {totalCount} maîtrisées
           </p>

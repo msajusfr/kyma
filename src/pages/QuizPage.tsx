@@ -1,22 +1,50 @@
 import { useEffect, useMemo, useState } from "react";
+import ExerciseSelector from "../components/ExerciseSelector";
 import PhraseCard from "../components/PhraseCard";
 import QuizOptions from "../components/QuizOptions";
 import SeriesHeader from "../components/SeriesHeader";
 import SeriesSelector from "../components/SeriesSelector";
-import { phrases } from "../data/phrases";
+import { exercises } from "../data/exercises";
 import { useQuizEngine } from "../hooks/useQuizEngine";
 import { getGreekVoiceName, speak } from "../services/speechService";
+import type { GreekExercise } from "../types/GreekPhrase";
 
 export default function QuizPage() {
+  const [selectedExerciseId, setSelectedExerciseId] = useState(exercises[0].id);
+  const selectedExercise =
+    exercises.find((exercise) => exercise.id === selectedExerciseId) ?? exercises[0];
+
+  return (
+    <QuizSession
+      key={selectedExercise.id}
+      exercise={selectedExercise}
+      selectedExerciseId={selectedExerciseId}
+      onSelectExercise={setSelectedExerciseId}
+    />
+  );
+}
+
+interface QuizSessionProps {
+  exercise: GreekExercise;
+  selectedExerciseId: string;
+  onSelectExercise: (exerciseId: string) => void;
+}
+
+function QuizSession({ exercise, selectedExerciseId, onSelectExercise }: QuizSessionProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [greekVoiceName, setGreekVoiceName] = useState<string | null | undefined>(undefined);
+  const storageKey =
+    exercise.id === "level-test-1-10"
+      ? "greek-quiz-trainer-progress"
+      : `greek-quiz-trainer-progress-${exercise.id}`;
   const {
     current,
     currentSeries,
     feedback,
     isSeriesComplete,
     masteredCount,
+    maxSeries,
     nextPhrase,
     progressBySeries,
     progressPercent,
@@ -26,7 +54,8 @@ export default function QuizPage() {
     submitAnswer,
     totalCount,
     unlockNextSeries,
-  } = useQuizEngine(phrases);
+  } = useQuizEngine(exercise.phrases, storageKey);
+  const currentSeriesLabel = exercise.seriesLabels[currentSeries] ?? `Série ${currentSeries}`;
 
   useEffect(() => {
     getGreekVoiceName().then(setGreekVoiceName);
@@ -63,14 +92,25 @@ export default function QuizPage() {
     <main className="min-h-screen px-4 py-5 text-[#f4efe2] sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-6xl flex-col">
         <SeriesHeader
+          exerciseTitle={exercise.title}
           masteredCount={masteredCount}
           progressPercent={progressPercent}
           series={currentSeries}
+          seriesLabel={currentSeriesLabel}
           totalCount={totalCount}
+        />
+        <ExerciseSelector
+          currentExerciseId={selectedExerciseId}
+          exercises={exercises}
+          onSelectExercise={(exerciseId) => {
+            setSelectedAnswer(null);
+            onSelectExercise(exerciseId);
+          }}
         />
         <SeriesSelector
           currentSeries={currentSeries}
           progressBySeries={progressBySeries}
+          seriesLabels={exercise.seriesLabels}
           onSelectSeries={(series) => {
             setSelectedAnswer(null);
             selectSeries(series);
@@ -157,8 +197,9 @@ export default function QuizPage() {
               Série {currentSeries} terminée
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#f4efe2]/65">
-              Série {currentSeries + 1} débloquée. Tu as maîtrisé les {totalCount} phrases de cette
-              série.
+              {currentSeries < maxSeries
+                ? `Série ${currentSeries + 1} débloquée. Tu as maîtrisé les ${totalCount} phrases de cette série.`
+                : `Exercice terminé. Tu as maîtrisé les ${totalCount} phrases de cette série.`}
             </p>
             <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
               <p className="rounded-lg border border-[#9fb27b]/25 bg-[#9fb27b]/12 p-4 font-semibold text-[#f4efe2]">
@@ -169,13 +210,15 @@ export default function QuizPage() {
               </p>
             </div>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={unlockNextSeries}
-                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#e7c982]/30 bg-[#e7c982]/12 px-5 text-sm font-bold text-[#e7c982] transition hover:bg-[#e7c982]/20 focus:outline-none focus:ring-2 focus:ring-[#e7c982]/45 focus:ring-offset-2 focus:ring-offset-[#18211f]"
-              >
-                Passer à la série {Math.min(currentSeries + 1, 10)}
-              </button>
+              {currentSeries < maxSeries ? (
+                <button
+                  type="button"
+                  onClick={unlockNextSeries}
+                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#e7c982]/30 bg-[#e7c982]/12 px-5 text-sm font-bold text-[#e7c982] transition hover:bg-[#e7c982]/20 focus:outline-none focus:ring-2 focus:ring-[#e7c982]/45 focus:ring-offset-2 focus:ring-offset-[#18211f]"
+                >
+                  Passer à la série {currentSeries + 1}
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={resetSeries}

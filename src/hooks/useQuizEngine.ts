@@ -18,6 +18,7 @@ interface SeriesProgress {
 interface QuizProgress {
   currentSeries: number;
   series: Record<string, SeriesProgress>;
+  unlockedSeries: number[];
 }
 
 const STORAGE_KEY = "greek-quiz-trainer-progress";
@@ -45,7 +46,32 @@ function createInitialProgress(phrases: GreekPhrase[]): QuizProgress {
     series: {
       "1": createSeriesProgress(phrases, 1),
     },
+    unlockedSeries: [1],
   };
+}
+
+function getAvailableSeries(phrases: GreekPhrase[]): number[] {
+  return Array.from(new Set(phrases.map((phrase) => phrase.series))).sort((a, b) => a - b);
+}
+
+function inferUnlockedSeries(progress: Pick<QuizProgress, "currentSeries" | "series">, phrases: GreekPhrase[]) {
+  const availableSeries = getAvailableSeries(phrases);
+  const reachedSeries = Math.max(
+    1,
+    progress.currentSeries,
+    ...Object.keys(progress.series)
+      .map(Number)
+      .filter(Number.isFinite)
+  );
+
+  return availableSeries.filter((series) => series <= reachedSeries);
+}
+
+function normalizeUnlockedSeries(series: number[], currentSeries: number, phrases: GreekPhrase[]) {
+  const availableSeries = getAvailableSeries(phrases);
+  const reachedSeries = Math.max(1, currentSeries, ...series);
+
+  return availableSeries.filter((seriesNumber) => seriesNumber <= reachedSeries);
 }
 
 function migrateProgress(rawProgress: unknown, phrases: GreekPhrase[]): QuizProgress {
@@ -55,7 +81,17 @@ function migrateProgress(rawProgress: unknown, phrases: GreekPhrase[]): QuizProg
     "series" in rawProgress &&
     "currentSeries" in rawProgress
   ) {
-    return rawProgress as QuizProgress;
+    const progress = rawProgress as QuizProgress;
+    return {
+      ...progress,
+      unlockedSeries: normalizeUnlockedSeries(
+        Array.isArray(progress.unlockedSeries)
+          ? progress.unlockedSeries
+          : inferUnlockedSeries(progress, phrases),
+        progress.currentSeries,
+        phrases
+      ),
+    };
   }
 
   if (
@@ -82,25 +118,35 @@ function migrateProgress(rawProgress: unknown, phrases: GreekPhrase[]): QuizProg
           stats: previous.stats,
         },
       },
+      unlockedSeries: inferUnlockedSeries(
+        {
+          currentSeries: previous.currentSeries,
+          series: {
+            [String(previous.currentSeries)]: {
+              masteredIds: previous.masteredIds,
+              queueIds: previous.queueIds,
+              stats: previous.stats,
+            },
+          },
+        },
+        phrases
+      ),
     };
   }
 
   return createInitialProgress(phrases);
 }
 
-export function useQuizEngine(phrases: GreekPhrase[]) {
+export function useQuizEngine(phrases: GreekPhrase[], storageKey = STORAGE_KEY) {
   const initialProgress = useMemo(() => createInitialProgress(phrases), [phrases]);
-  const [storedProgress, setProgress] = useLocalStorage<unknown>(STORAGE_KEY, initialProgress);
+  const [storedProgress, setProgress] = useLocalStorage<unknown>(storageKey, initialProgress);
   const progress = useMemo(
     () => migrateProgress(storedProgress, phrases),
     [storedProgress, phrases]
   );
   const [feedback, setFeedback] = useState<QuizFeedback | null>(null);
 
-  const availableSeries = useMemo(
-    () => Array.from(new Set(phrases.map((phrase) => phrase.series))).sort((a, b) => a - b),
-    [phrases]
-  );
+  const availableSeries = useMemo(() => getAvailableSeries(phrases), [phrases]);
 
   const currentSeriesProgress =
     progress.series[String(progress.currentSeries)] ??
@@ -161,6 +207,10 @@ export function useQuizEngine(phrases: GreekPhrase[]) {
       setFeedback(null);
       setProgress((previousRaw: unknown) => {
         const previous = migrateProgress(previousRaw, phrases);
+        if (!previous.unlockedSeries.includes(series)) {
+          return previous;
+        }
+
         return {
           ...previous,
           currentSeries: series,
@@ -248,8 +298,24 @@ export function useQuizEngine(phrases: GreekPhrase[]) {
 
   const unlockNextSeries = useCallback(() => {
     const nextSeries = Math.min(progress.currentSeries + 1, Math.max(...availableSeries));
-    selectSeries(nextSeries);
-  }, [availableSeries, progress.currentSeries, selectSeries]);
+    setFeedback(null);
+    setProgress((previousRaw: unknown) => {
+      const previous = migrateProgress(previousRaw, phrases);
+      return {
+        ...previous,
+        currentSeries: nextSeries,
+        unlockedSeries: normalizeUnlockedSeries(
+          [...previous.unlockedSeries, nextSeries],
+          nextSeries,
+          phrases
+        ),
+        series: {
+          ...previous.series,
+          [String(nextSeries)]: previous.series[String(nextSeries)] ?? createSeriesProgress(phrases, nextSeries),
+        },
+      };
+    });
+  }, [availableSeries, phrases, progress.currentSeries, setProgress]);
 
   return {
     availableSeries,
@@ -257,6 +323,7 @@ export function useQuizEngine(phrases: GreekPhrase[]) {
     currentSeries: progress.currentSeries,
     feedback,
     isSeriesComplete,
+    maxSeries: Math.max(...availableSeries),
     masteredCount,
     nextPhrase,
     progressBySeries: availableSeries.map((series) => {
@@ -264,6 +331,7 @@ export function useQuizEngine(phrases: GreekPhrase[]) {
       const total = phrases.filter((phrase) => phrase.series === series).length;
       return {
         series,
+        isUnlocked: progress.unlockedSeries.includes(series),
         masteredCount: seriesProgress.masteredIds.length,
         totalCount: total,
       };
