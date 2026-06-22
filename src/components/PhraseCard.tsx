@@ -20,7 +20,7 @@ export default function PhraseCard({ phrase }: PhraseCardProps) {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c982]/55 to-transparent" />
       <div className="flex min-h-[220px] items-center justify-between gap-4 p-6 md:min-h-[280px] md:p-8">
         <div className="min-w-0 flex-1">
-          <p className={`${greekTextSize} break-words font-bold leading-tight tracking-normal text-[#f4efe2]`}>
+          <p className={`${greekTextSize} whitespace-normal font-bold leading-snug tracking-normal text-[#f4efe2] [overflow-wrap:normal]`}>
             {phrase.greek}
           </p>
           {phrase.transliteration ? (
@@ -36,10 +36,17 @@ export default function PhraseCard({ phrase }: PhraseCardProps) {
 }
 
 function getGreekTextSize(text: string) {
-  const longestWordLength = text
-    .split(/\s+/)
-    .reduce((longest, word) => Math.max(longest, word.replace(/[.,;!?·]/g, "").length), 0);
+  const words = text.split(/\s+/);
+  const longestWordLength = words.reduce(
+    (longest, word) => Math.max(longest, word.replace(/[.,;!?·]/g, "").length),
+    0
+  );
+  const length = text.length;
 
+  if (length >= 140) return "text-xl md:text-5xl";
+  if (length >= 110) return "text-2xl md:text-6xl";
+  if (length >= 82) return "text-3xl md:text-7xl";
+  if (length >= 58) return "text-4xl md:text-7xl";
   if (longestWordLength >= 16) return "text-3xl md:text-7xl";
   if (longestWordLength >= 12) return "text-4xl md:text-7xl";
   if (longestWordLength >= 10) return "text-[2.75rem] md:text-8xl";

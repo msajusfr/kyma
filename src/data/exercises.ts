@@ -1,4 +1,5 @@
 import { advancedGreekQuizPhrases, advancedGreekQuizSeriesLabels } from "./advancedGreekQuiz";
+import { cefrGreekPhrases, cefrGreekSeriesLabels } from "./cefrGreekPhrases";
 import { keaShoppingPhrases } from "./keaShoppingPhrases";
 import { phrases as levelTestPhrases } from "./phrases";
 import type { GreekExercise } from "../types/GreekPhrase";
@@ -39,5 +40,12 @@ export const exercises: GreekExercise[] = [
     description: "10 000 phrases courtes en quiz de traduction, par blocs de 1 000 phrases.",
     seriesLabels: advancedGreekQuizSeriesLabels,
     phrases: advancedGreekQuizPhrases,
+  },
+  {
+    id: "official-cefr-a1-c2",
+    title: "Niveaux officiels A1-C2",
+    description: "600 phrases classées par niveau officiel, de A1 à C2.",
+    seriesLabels: cefrGreekSeriesLabels,
+    phrases: cefrGreekPhrases,
   },
 ];
