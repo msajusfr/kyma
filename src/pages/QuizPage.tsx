@@ -7,12 +7,24 @@ import SeriesSelector from "../components/SeriesSelector";
 import { exercises } from "../data/exercises";
 import { useQuizEngine } from "../hooks/useQuizEngine";
 import { getGreekVoiceName, speak } from "../services/speechService";
-import type { GreekExercise } from "../types/GreekPhrase";
+import type { QuizExercise } from "../types/GreekPhrase";
+import AssistedReadingPage from "./AssistedReadingPage";
 
 export default function QuizPage() {
   const [selectedExerciseId, setSelectedExerciseId] = useState(exercises[0].id);
   const selectedExercise =
     exercises.find((exercise) => exercise.id === selectedExerciseId) ?? exercises[0];
+
+  if (selectedExercise.mode === "assisted-reading") {
+    return (
+      <AssistedReadingPage
+        exercise={selectedExercise}
+        exercises={exercises}
+        selectedExerciseId={selectedExerciseId}
+        onSelectExercise={setSelectedExerciseId}
+      />
+    );
+  }
 
   return (
     <QuizSession
@@ -25,7 +37,7 @@ export default function QuizPage() {
 }
 
 interface QuizSessionProps {
-  exercise: GreekExercise;
+  exercise: QuizExercise;
   selectedExerciseId: string;
   onSelectExercise: (exerciseId: string) => void;
 }
@@ -212,7 +224,7 @@ function QuizSession({ exercise, selectedExerciseId, onSelectExercise }: QuizSes
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#f4efe2]/65">
               {currentSeries < maxSeries
-                ? `Série ${currentSeries + 1} débloquée. Tu as maîtrisé les ${totalCount} phrases de cette série.`
+                ? `Tu as maîtrisé les ${totalCount} phrases de cette série. Tu peux continuer avec la série ${currentSeries + 1}.`
                 : `Exercice terminé. Tu as maîtrisé les ${totalCount} phrases de cette série.`}
             </p>
             <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">

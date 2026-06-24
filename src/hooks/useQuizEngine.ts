@@ -207,10 +207,6 @@ export function useQuizEngine(phrases: GreekPhrase[], storageKey = STORAGE_KEY) 
       setFeedback(null);
       setProgress((previousRaw: unknown) => {
         const previous = migrateProgress(previousRaw, phrases);
-        if (!previous.unlockedSeries.includes(series)) {
-          return previous;
-        }
-
         return {
           ...previous,
           currentSeries: series,
@@ -304,11 +300,7 @@ export function useQuizEngine(phrases: GreekPhrase[], storageKey = STORAGE_KEY) 
       return {
         ...previous,
         currentSeries: nextSeries,
-        unlockedSeries: normalizeUnlockedSeries(
-          [...previous.unlockedSeries, nextSeries],
-          nextSeries,
-          phrases
-        ),
+        unlockedSeries: normalizeUnlockedSeries(previous.unlockedSeries, nextSeries, phrases),
         series: {
           ...previous.series,
           [String(nextSeries)]: previous.series[String(nextSeries)] ?? createSeriesProgress(phrases, nextSeries),
@@ -331,7 +323,7 @@ export function useQuizEngine(phrases: GreekPhrase[], storageKey = STORAGE_KEY) 
       const total = phrases.filter((phrase) => phrase.series === series).length;
       return {
         series,
-        isUnlocked: progress.unlockedSeries.includes(series),
+        isUnlocked: true,
         masteredCount: seriesProgress.masteredIds.length,
         totalCount: total,
       };

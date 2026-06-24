@@ -1,6 +1,5 @@
 interface SeriesProgressItem {
   series: number;
-  isUnlocked: boolean;
   masteredCount: number;
   totalCount: number;
 }
@@ -21,7 +20,7 @@ export default function SeriesSelector({
   return (
     <section className="mb-4 rounded-xl border border-white/10 bg-[#18211f]/80 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.22)]">
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {progressBySeries.map(({ series, isUnlocked, masteredCount, totalCount }) => {
+        {progressBySeries.map(({ series, masteredCount, totalCount }) => {
           const active = series === currentSeries;
           const label = seriesLabels[series] ?? `Série ${series}`;
           const percent = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
@@ -30,19 +29,12 @@ export default function SeriesSelector({
             <button
               key={series}
               type="button"
-              disabled={!isUnlocked}
               onClick={() => onSelectSeries(series)}
-              aria-label={
-                isUnlocked
-                  ? `Série ${series}, ${label}, ${masteredCount} sur ${totalCount}`
-                  : `Série ${series}, ${label}, verrouillée`
-              }
-              className={`min-w-36 rounded-lg border px-3 py-2 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:active:scale-100 ${
+              aria-label={`Série ${series}, ${label}, ${masteredCount} sur ${totalCount}`}
+              className={`min-w-36 rounded-lg border px-3 py-2 text-left transition active:scale-[0.99] ${
                 active
                   ? "border-[#e7c982]/45 bg-[#e7c982]/12 text-[#f4efe2]"
-                  : !isUnlocked
-                    ? "border-white/6 bg-white/[0.025] text-[#f4efe2]/35"
-                    : "border-white/8 bg-white/[0.04] text-[#f4efe2]/70 hover:border-[#e7c982]/25 hover:bg-white/[0.07]"
+                  : "border-white/8 bg-white/[0.04] text-[#f4efe2]/70 hover:border-[#e7c982]/25 hover:bg-white/[0.07]"
               }`}
             >
               <span className="block text-xs font-bold uppercase tracking-[0.16em] text-[#e7c982]/75">
@@ -56,7 +48,7 @@ export default function SeriesSelector({
                 />
               </span>
               <span className="mt-1 block text-xs text-[#f4efe2]/45">
-                {isUnlocked ? `${masteredCount} / ${totalCount}` : "À débloquer"}
+                {masteredCount} / {totalCount}
               </span>
             </button>
           );

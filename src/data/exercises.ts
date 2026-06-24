@@ -2,6 +2,7 @@ import { advancedGreekQuizPhrases, advancedGreekQuizSeriesLabels } from "./advan
 import { cefrGreekPhrases, cefrGreekSeriesLabels } from "./cefrGreekPhrases";
 import { keaShoppingPhrases } from "./keaShoppingPhrases";
 import { phrases as levelTestPhrases } from "./phrases";
+import { timiKaiToXrimaReading } from "./timiKaiToXrimaReading";
 import type { GreekExercise } from "../types/GreekPhrase";
 
 export const exercises: GreekExercise[] = [
@@ -48,4 +49,5 @@ export const exercises: GreekExercise[] = [
     seriesLabels: cefrGreekSeriesLabels,
     phrases: cefrGreekPhrases,
   },
+  timiKaiToXrimaReading,
 ];
